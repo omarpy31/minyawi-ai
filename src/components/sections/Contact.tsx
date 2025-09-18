@@ -13,6 +13,7 @@ const Contact = () => {
     message: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [isSubmitted, setIsSubmitted] = useState(false)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -26,18 +27,50 @@ const Contact = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setSubmitStatus('idle')
     
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    setIsSubmitting(false)
-    setIsSubmitted(true)
-    
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setIsSubmitted(false)
-      setFormData({ name: '', email: '', countryCode: '+1', phone: '', service: '', message: '' })
-    }, 3000)
+    try {
+      // Prepare submission data with timestamp and formatted phone number
+      const submissionData = {
+        name: formData.name,
+        email: formData.email,
+        phone: `${formData.countryCode.replace('+', '')}${formData.phone}`,
+        countryCode: formData.countryCode,
+        phoneNumber: formData.phone,
+        service: formData.service,
+        message: formData.message,
+        submissionDateTime: new Date().toISOString(),
+        submissionTimestamp: Date.now()
+      }
+
+      // Send data to webhook
+      const response = await fetch('https://omar0101.app.n8n.cloud/webhook/66a47fb0-d834-4fb3-a890-97cdb50886af', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionData)
+      })
+
+      if (response.ok) {
+        setSubmitStatus('success')
+        setIsSubmitted(true)
+        
+        // Reset form after 3 seconds
+        setTimeout(() => {
+          setIsSubmitted(false)
+          setSubmitStatus('idle')
+          setFormData({ name: '', email: '', countryCode: '+1', phone: '', service: '', message: '' })
+        }, 3000)
+      } else {
+        throw new Error('Failed to submit form')
+      }
+    } catch (error) {
+      console.error('Form submission error:', error)
+      setSubmitStatus('error')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -86,6 +119,26 @@ const Contact = () => {
                   <h4 className="text-xl font-semibold text-green-600 mb-2">Message Sent!</h4>
                   <p className="text-gray-600">Thank you for reaching out. We'll get back to you soon.</p>
                 </motion.div>
+              ) : submitStatus === 'error' ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-8"
+                >
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <h4 className="text-xl font-semibold text-red-600 mb-2">Submission Failed</h4>
+                  <p className="text-gray-600">There was an error sending your message. Please try again.</p>
+                  <button
+                    onClick={() => setSubmitStatus('idle')}
+                    className="mt-4 px-6 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Try Again
+                  </button>
+                </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
@@ -124,13 +177,13 @@ const Contact = () => {
                     <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
                       Phone Number *
                     </label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <select
                         id="countryCode"
                         name="countryCode"
                         value={formData.countryCode}
                         onChange={handleInputChange}
-                        className="px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent transition-all duration-300 outline-none bg-white text-gray-900 min-w-20"
+                        className="px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent transition-all duration-300 outline-none bg-white text-gray-900 w-full sm:w-auto sm:min-w-32"
                       >
                         <option value="+93">🇦🇫 +93 (Afghanistan)</option>
                         <option value="+355">🇦🇱 +355 (Albania)</option>
@@ -365,7 +418,7 @@ const Contact = () => {
                         value={formData.phone}
                         onChange={handleInputChange}
                         required
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent transition-all duration-300 outline-none text-gray-900"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent transition-all duration-300 outline-none text-gray-900"
                         placeholder="123 456 7890"
                       />
                     </div>
