@@ -31,6 +31,7 @@ const Contact = () => {
     
     try {
       // Prepare submission data with timestamp and formatted phone number
+      const now = new Date()
       const submissionData = {
         name: formData.name,
         email: formData.email,
@@ -39,8 +40,10 @@ const Contact = () => {
         phoneNumber: formData.phone,
         service: formData.service,
         message: formData.message,
-        submissionDateTime: new Date().toISOString(),
-        submissionTimestamp: Date.now()
+        submissionDateTime: now.toISOString(),
+        submissionDateTimeLocal: now.toLocaleString(),
+        submissionTimestamp: now.getTime(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
       }
 
       // Send data to webhook
