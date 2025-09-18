@@ -7,12 +7,13 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    service: '',
     message: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
@@ -33,7 +34,7 @@ const Contact = () => {
     // Reset form after 3 seconds
     setTimeout(() => {
       setIsSubmitted(false)
-      setFormData({ name: '', email: '', message: '' })
+      setFormData({ name: '', email: '', service: '', message: '' })
     }, 3000)
   }
 
@@ -96,7 +97,7 @@ const Contact = () => {
                       value={formData.name}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent transition-all duration-300 outline-none"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent transition-all duration-300 outline-none text-gray-900"
                       placeholder="Your full name"
                     />
                   </div>
@@ -112,9 +113,30 @@ const Contact = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent transition-all duration-300 outline-none"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent transition-all duration-300 outline-none text-gray-900"
                       placeholder="your.email@example.com"
                     />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="service" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Service of Interest *
+                    </label>
+                    <select
+                      id="service"
+                      name="service"
+                      value={formData.service}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-gold focus:border-transparent transition-all duration-300 outline-none bg-white text-gray-900"
+                    >
+                      <option value="">Select a service...</option>
+                      <option value="AI Automation Solutions">AI Automation Solutions</option>
+                      <option value="Workflow Optimization">Workflow Optimization</option>
+                      <option value="Custom Chatbots">Custom Chatbots</option>
+                      <option value="AI Consulting">AI Consulting</option>
+                      <option value="Custom Service">Custom Service (Please specify in message)</option>
+                    </select>
                   </div>
                   
                   <div>
